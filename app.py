@@ -65,15 +65,33 @@ def check_username(username):
     existing_user_username = User.query.filter_by(username=username).first()
     return jsonify({'exists': existing_user_username is not None})
 
+from flask_login import login_user  # Assuming you're using Flask-Login
+
+from flask import flash
+
+from flask import render_template, flash
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    login_successful = None  # Variable to indicate login success
+
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
+
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
+            login_successful = True  # Set the variable to True for successful login
+            flash('Login successful', 'success')
             return redirect(url_for('dashboard'))
-    return render_template('login.html', form=form)
+        else:
+            flash('Invalid username or password', 'error')
+            login_successful = False  # Set the variable to False for unsuccessful login
+
+    return render_template('login.html', form=form, login_successful=login_successful)
+
+
+
 
 
 @app.route('/dashboard')

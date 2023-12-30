@@ -12,6 +12,7 @@
     #username-feedback {
         color: rgb(255, 0, 0);
     }
+    
 </style>
 <body>
     
@@ -46,6 +47,9 @@
                 <span>or use your email password</span>
                 {{ form.username }}
                 {{ form.password }}
+                {% if login_successful == false %}
+                <p id="password-feedback" style="color: red;">Invalid username or password.</p>
+                {% endif %}
                 <a href="#">Forget Your Password?</a>
                 <button>Sign In</button>
                 </form>
