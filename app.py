@@ -6,6 +6,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
+from flask import jsonify
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -59,6 +60,10 @@ class LoginForm(FlaskForm):
 def home():
     return render_template('home.html')
 
+@app.route('/check_username/<username>', methods=['GET'])
+def check_username(username):
+    existing_user_username = User.query.filter_by(username=username).first()
+    return jsonify({'exists': existing_user_username is not None})
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -95,7 +100,7 @@ def register():
         db.session.commit()
         return redirect(url_for('login'))
 
-    return render_template('register.html', form=form)
+    return render_template('login.html', form=form)
 
 
 if __name__ == "__main__":

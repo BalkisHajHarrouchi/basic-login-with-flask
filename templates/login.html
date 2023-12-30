@@ -8,9 +8,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Modern Login Page | AsmrProg</title>
 </head>
-
+<style>
+    #username-feedback {
+        color: rgb(255, 0, 0);
+    }
+</style>
 <body>
-
+    
     <div class="container" id="container">
         <div class="form-container sign-up">
             <form method="POST" action="{{ url_for('register') }}">
@@ -25,6 +29,7 @@
                 <span>or use your email for registration</span>
                 {{ form.username }}
                 {{ form.password }}
+                <p id="username-feedback"></p>
                 <button>Sign Up</button>
             </form>
         </div>
@@ -62,6 +67,60 @@
         </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const feedbackMessage = document.getElementById('username-feedback');
+            const registerButton = document.getElementById('register-btn');
 
-</html>
+            usernameInput.addEventListener('input', function () {
+                const username = usernameInput.value;
+
+                fetch(`/check_username/${username}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const usernameValid = username.length > 4;
+
+                        if (data.exists) {
+                            feedbackMessage.textContent = 'Username already exists.';
+                            registerButton.disabled = true;
+                        } else {
+                            if (!usernameValid) {
+                                feedbackMessage.textContent = 'Username should be more than 4 characters.';
+                                registerButton.disabled = true;
+                            } else {
+                                feedbackMessage.textContent = '';
+                                registerButton.disabled = false;
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error checking username:', error));
+            });
+
+            passwordInput.addEventListener('input', function () {
+                validateInputs();
+            });
+
+            function validateInputs() {
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                const usernameValid = username.length > 4;
+                const passwordValid = password.length > 8 && /\d/.test(password) && /[a-zA-Z]/.test(password);
+
+                if (!usernameValid) {
+                    feedbackMessage.textContent = 'Username should be more than 4 characters.';
+                } else if (!passwordValid) {
+                    feedbackMessage.textContent = 'Password should be more than 8 characters and contain both characters and numbers.';
+                } else {
+                    feedbackMessage.textContent = '';
+                }
+
+                registerButton.disabled = !(usernameValid && passwordValid);
+            }
+        });
+    </script>
+    </body>
+    
+    </html>
